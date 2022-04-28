@@ -1,8 +1,10 @@
 ---
-title: "New HIV diagnoses in the UK by probable route of exposure: a paradigm shift"
-author: "Student: 210155372"
+title: 'New HIV diagnoses in the UK by probable route of exposure: a paradigm shift'
+author: 'Student: 210155372'
 date: "27/4/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
