@@ -1,0 +1,36 @@
+
+
+hiv_country_region_data_tables_2021.ods
+
+-original data file.
+
+hiv_country_region_data_tables_2021.csv
+
+-contains the fourth sheet(exported in csv) of the original hiv-country-region-data-tables-2021.ods, from the UK Health  Security Agency in gov.uk. 
+
+
+-For the current project were used only colums I,J,K,L,M,N,O,P,Q and R.
+ 
+  Column I represents new HIV cases in 2011.
+  Column J represents new HIV cases in 2012.
+  Column K represents new HIV cases in 2013.
+  Column L represents new HIV cases in 2014.
+  Column M represents new HIV cases in 2015.
+  Column N represents new HIV cases in 2016.
+  Column O represents new HIV cases in 2017.
+  Column P represents new HIV cases in 2018.
+  Column Q represents new HIV cases in 2019.
+  Column R represents new HIV cases in 2020.
+ 
+ 
+ -For the current project were used only rows 35,36,37,38,41, 50 and 53.
+  
+  Row 35 represents new HIV cases by category: sex between men (subtotal).
+  Row 36 represents new HIV cases by category: heterosexual contact men.
+  Row 37 represents new HIV cases by category: heterosexual contact woman.
+  Row 38 represents new HIV cases by category: heterosexual contact subtotal.
+  Row 41 represents new HIV cases by category: injecting drug use (subtotal).
+  Row 50 represents new HIV cases by category: vertical transmission (subtotal).
+  Row 53 represents new HIV cases by category: other (subtotal).
+  
+  

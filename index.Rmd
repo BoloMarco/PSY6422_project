@@ -1,0 +1,331 @@
+---
+title: "New HIV diagnoses in the UK by probable route of exposure: a paradigm shift"
+author: "Student: 210155372"
+date: "27/4/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br>
+
+<font size= "4"> <b>
+Background 
+</b> </font>
+
+<p align="justify">
+On the 5th of June 1981, in its weekly epidemiological digest, Morbidity and Mortality Weekly Report, the American Centres for Disease Control and Prevention reported unusual clusters of Pneumocystis pneumonia (PCP) in five homosexual men. This event represents the origin of the AIDS epidemic. Acquired immunodeficiency syndrome (AIDS) is a chronic medical condition caused by HIV, the human immunodeficiency virus. HIV infects and kills the CD4 T lymphocytes of the immune system, leaving the body vulnerable to cancers and life-threatening infections. To slow the rapid growth in cases of this deadly virus, since the beginning various medical agencies started to study the epidemiological spread of HIV.
+</p>
+
+<br>
+
+<font size= "4"> <b>
+Motivation and research questions 
+</b> </font>
+
+<p align="justify">
+In the ninth edition of the “Robbins and Cotran Pathologic Basis of Disease (2014)”, an extremely popular medical textbook, the authors indicate that in 2009 the majority of infected people in the United States were men who had sex with men. Considering that the epidemiological situation of HIV in the UK is not particularly different from the US, and considering that the statistics reported in the textbook are outdated, I saw the opportunity to ask the following research questions: 
+</p>
+
+1) Is still “sex between men” the main exposure category for HIV in the UK?
+
+2) If the HIV cases attributed to the “heterosexual contact” outnumber the ones related to “sex between men”, which is the gender with the most significant incidence?
+
+<br>
+
+<font size= "4"> <b>
+Data Origins 
+</b> </font>
+
+<p align="justify">
+For this project, I used the “Country and region HIV data tables” from the UK Health Security Agency that can be found on the site gov.uk. 
+The data tables’ information that was used for the project is the number of cases per year, from 2011 to 2020, for new HIV diagnoses in the UK by probable route of exposure.
+The link is: </p> https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1037993/hiv-country-region-data-tables-2021.ods
+</p>
+
+<br>
+
+<font size= "4"> <b>
+Libraries 
+</b> </font>
+
+<p align="justify">
+In this section, I imported all the libraries I used in the code.
+</p>
+```{r message = FALSE, warning = FALSE}
+#Importing all the libraries used in the code
+library(tidyverse)
+library(here)
+library(gganimate)
+library(gifski)
+library(wesanderson)
+library(magick)
+```
+
+<br>
+
+<font size= "4"> <b>
+Data Preparation 
+</b> </font>
+
+<p align="justify">
+In this section, I organised the data set to ease its access and analysis.
+</p>
+```{r}
+#Loading the data set
+raw_data <- read.csv(here("Data", "hiv_country_region_data_tables_2021.csv"),
+                     #Choosing the specific rows
+                     skip = 32, nrows = 20, sep = ";")
+
+#Eliminating unused columns
+raw_data <- raw_data[ , -c(1:8,19:28)]
+
+#Eliminating unused rows
+raw_data <- raw_data[-c(6,7,9:16,18,19) , ]
+
+#Transposing the data set
+plot_data <- t(raw_data)
+
+#Summing three columns together in a new column
+new_col <- plot_data[,6] + plot_data[,7] + plot_data[,8]
+
+#Adding the new column to the data set
+plot_data <- cbind(plot_data, new_col)
+
+#Naming columns
+colnames(plot_data) <- c("Year", 
+                         "Sex_Between_Men",
+                         "Heterosexual_Contact_Men",
+                         "Heterosexual_Contact_Women",
+                         "Heterosexual_Contact_Total",
+                         "Injecting_Drug_Use",
+                         "Vertical_Transmission",
+                         "Other",
+                         "Other_Exposure_Categories") 
+
+#Eliminating the name of the rows
+rownames(plot_data) <- NULL
+
+#Converting the matrix into a data frame
+plot_data <- as.data.frame.matrix(plot_data)
+
+```
+
+<br>
+
+<font size= "4"> <b>
+Data Visualisation  
+</b> </font>
+
+<p align="justify">
+I created an animated GIF with two line graphs in this section.
+</p>
+```{r}
+#Giving the title to the first graph
+plot_data$title1 <- "New HIV diagnoses in the UK by probable route of exposure"
+
+#Giving the title to the second graph
+plot_data$title2 <- "New HIV diagnoses in the UK by heterosexual contact"
+
+#Choosing the palette for the colours of the graph
+pal <- wes_palette("Darjeeling1", n = 5)
+
+
+#Plotting first graph
+HIV_plot1 <- ggplot() +
+  #Plotting lines
+  geom_line(data = plot_data,aes(x = Year, y = Sex_Between_Men, group = 1),
+            colour = pal[1], size=1) +
+  geom_line(data = plot_data, aes(x =Year, y = Heterosexual_Contact_Total, 
+                                  group = 1), 
+            colour = pal[2], size=1) +
+  geom_line(data = plot_data, aes(x =Year, y = Other_Exposure_Categories, 
+                                  group = 1),
+            colour = pal[3], size=1) +
+  #Plotting dashed segments
+  geom_segment(data = plot_data,aes(x=Year, y= Sex_Between_Men, 
+                                    xend = 2020.9,  yend = Sex_Between_Men, 
+                                    group = 1),
+               linetype = 2, colour = 'gray28', show.legend = FALSE) +
+  geom_segment(data = plot_data,aes(x=Year, y= Heterosexual_Contact_Total,
+                                    xend = 2020.75,  
+                                    yend = Heterosexual_Contact_Total,
+                                    group = 1), 
+               linetype = 2, colour = 'gray28', show.legend = FALSE) +
+  geom_segment(data = plot_data,aes(x=Year, y= Other_Exposure_Categories,
+                                    xend = 2020.5,
+                                    yend = Other_Exposure_Categories,group = 1),
+               linetype = 2, colour = 'gray28', show.legend = FALSE) + 
+  #Plotting texts
+  geom_text(data = plot_data, aes(x = 2020.9, y= Sex_Between_Men,
+                                 label = "Sex Between Men", size=15, 
+                                 group = 1),
+            color = pal[1], hjust=0, vjust = 0.5, show.legend = FALSE) +
+  geom_text(data = plot_data,aes(x = 2020.75, y= Heterosexual_Contact_Total,
+                                 label = "Heterosexual Contact", size= 15,
+                                 group = 1), 
+            color = pal[2], hjust=0,  vjust = 0.25, show.legend = FALSE) +
+  geom_text(data = plot_data,aes(x = 2020.5, y= Other_Exposure_Categories,
+                                 label = "Other Exposure Categories", 
+                                 size=15, group = 1),
+            color = pal[3], hjust = 0, show.legend = FALSE) + 
+  #Choosing names, ticks and limits of the axes
+  scale_x_continuous(name="Year", limits = c(2011,2023),
+                     breaks = round(seq(2011,2020, by=1)),
+                     minor_breaks = round(seq(2011,2020, by=1))) + 
+  scale_y_continuous(name = "HIV Cases", breaks = round(seq(0,3000, by=500))) +
+  #Displaying the title inside a grey box
+  facet_grid(. ~ title1) + 
+  #Choosing the theme for the plot
+  theme_bw() +
+  #Adjusting the aspect ratio of the graph and the text font
+  theme(aspect.ratio=1/1.5, text = element_text(size=15),
+        strip.text.x = element_text(size = 16, hjust = 0.5, face= "bold"))
+
+
+#Plotting second graph
+HIV_plot2 <- ggplot() +
+  #Plotting lines
+  geom_line(data = plot_data,aes(x = Year, y = Heterosexual_Contact_Men, 
+                                 group = 1),
+            colour = pal[4], size=1) +
+  geom_line(data = plot_data, aes(x =Year, y = Heterosexual_Contact_Women, 
+                                  group = 1), 
+            colour = pal[5], size=1) + 
+  #Plotting dashed segments
+  geom_segment(data = plot_data,aes(x=Year, y= Heterosexual_Contact_Men,
+                                    xend = 2021.65, 
+                                    yend = Heterosexual_Contact_Men,group = 1), 
+               linetype = 2, colour = 'gray28', show.legend = FALSE) +
+  geom_segment(data = plot_data,aes(x=Year, y= Heterosexual_Contact_Women,
+                                    xend = 2021.5,
+                                    yend = Heterosexual_Contact_Women,
+                                    group = 1), 
+               linetype = 2, colour = 'gray28', show.legend = FALSE) + 
+  #Plotting texts
+  geom_text(data = plot_data,aes(x = 2021.65, y= Heterosexual_Contact_Men,
+                                 label = "Men",size=15, group = 1),
+            color = pal[4], hjust = 0, show.legend = FALSE) +
+  geom_text(data = plot_data,aes(x = 2021.5, y= Heterosexual_Contact_Women,
+                                 label = "Women", size=15,group = 1),
+            color = pal[5], hjust = 0, show.legend = FALSE) +
+  #Choosing names, ticks and limits of the axes
+  scale_x_continuous(name="Year", breaks = round(seq(2011,2020,by=1)),
+                     minor_breaks = round(seq(2011,2020, by=1)), 
+                     limits = c(2011,2023)) + 
+  scale_y_continuous(name = "HIV Cases",
+                     breaks = round(seq(0,1750, by=250)),
+                     limits = c(0,1750)) +
+  #Displaying the title inside a grey box
+  facet_grid(. ~ title2) + 
+  #Choosing the theme for the plot
+  theme_bw() +
+  #Adjusting the aspect ratio of the graph and the text font
+  theme(text=element_text(size=15), aspect.ratio=1/1.5, 
+        strip.text.x = element_text(size = 16, hjust = 0.5, face= "bold"))
+
+
+#Creating the first animation
+HIV_animation1 <- HIV_plot1 + 
+  #Adding the points to the animation
+  geom_point(data =plot_data,aes(x=Year, y = Sex_Between_Men,
+                                 group = seq_along(Year)),
+             pch=16, size=2.5,colour = pal[1]) +
+  geom_point(data = plot_data, aes(x =Year,
+                                   y = Heterosexual_Contact_Total,
+                                   group = seq_along(Year)),
+             pch=16, size=2.5,colour = pal[2]) +
+  geom_point(data = plot_data, aes(x =Year, y = Other_Exposure_Categories,
+                                   group = seq_along(Year)),
+             pch=16, size =2.5,colour = pal[3]) +
+  #Specifying each frame by subsequent years
+  transition_reveal(Year)
+#Rendering the animation
+HIV_animation1 <- animate(HIV_animation1, renderer = gifski_renderer(),
+                          end_pause = 50, height = 600, width = 900)
+
+
+#Creating the second animation
+HIV_animation2 <- HIV_plot2 + 
+  #Adding the points to the animation
+  geom_point(data =plot_data,aes(x=Year, y = Heterosexual_Contact_Men, 
+                                 group = seq_along(Year)),
+             pch=16, size=2.5,colour = pal[4]) +
+  geom_point(data = plot_data, aes(x =Year, y = Heterosexual_Contact_Women,
+                                   group = seq_along(Year)),
+             pch=16, size=2.5,colour = pal[5]) +
+  #Specifying each frame by subsequent years
+  transition_reveal(Year)
+#Rendering the animation
+HIV_animation2 <-animate(HIV_animation2, renderer = gifski_renderer(),
+                         end_pause = 50, height = 600, width = 900)
+
+
+#Loading the set of images as a GIF
+HIV_gif1 <- image_read(HIV_animation1)
+HIV_gif2 <- image_read(HIV_animation2)
+
+
+#Merging the GIFs together
+
+#Creating the first frame of the new GIF
+HIV_gif3 <- image_append(c(HIV_gif1[1], HIV_gif2[1]),TRUE)
+
+#Starting a loop
+for(i in 2:50){
+  #Adding all the other frames to the GIF
+  combined <- image_append(c(HIV_gif1[i], HIV_gif2[i]), TRUE)
+  HIV_gif3 <- c(HIV_gif3, combined)
+  }
+
+
+#Saving the GIFs
+anim_save(here("Plots", "HIV_route_of_exposure.gif"), HIV_gif1)
+anim_save(here("Plots", "HIV_heterosexual_contact.gif"), HIV_gif2)
+anim_save(here("Plots", "HIV_final.gif"), HIV_gif3)
+
+
+#Displaying the final animated GIF
+HIV_gif3
+```
+
+<br>
+
+<font size= "4"> <b>
+Results   
+</b> </font>
+
+<p align="justify">
+In the first graph, “New HIV diagnoses in the UK by probable route of exposure”, we can see a reduction in the number of new cases, which is remarkably consistent for the category “sex between men”. This drastic decrease has been achieved in all probability with the introduction of the HIV prevention pill PrEP (pre-exposure prophylaxis) in the UK, which has reduced the cases since 2014 predominantly in gay and bisexual men. Another element to notice is that in 2020, the cases related to the “heterosexual contact” route of exposure outnumbered the case for the “sex between men” category. For this year (2020), the ulterior reduction of cases results from the Covid 19 lockdown that contributed to the reduction in testing. But considering that in sexual health clinics, there was a 33% fall in HIV testing by heterosexuals compared to the lower 7% rate of gay men, the higher number of cases in heterosexuals if compared to the number of cases in gay men is even more significant. The second graph, “New HIV diagnoses in the UK by heterosexual contact”, clarifies that there is a more significant incidence of HIV cases in heterosexual women than in heterosexual men.
+</p>
+
+<br>
+
+<font size= "4"> <b>
+Future Directions 
+</b> </font>
+
+<p align="justify">
+For a future project, it would be interesting to compare, using a data visualization strategy, the British epidemiological situation of HIV with countries that have a different sociocultural status in order to investigate possible relevant variations in the current epidemiological spread of HIV. 
+</p>
+
+<br>
+
+<font size= "4"> <b>
+References 
+</b> </font>
+
+<p align="justify">
+- Centers for Disease Control (CDC). Pneumocystis pneumonia--Los Angeles. MMWR Morb Mortal Wkly Rep. 1981 Jun 5;30(21):250-2. PMID: 6265753.
+
+- Kumar, V., Abbas, A. K., Fausto, N., & Aster, J. C. (2014). Robbins and Cotran pathologic basis of disease, professional edition e-book. Elsevier health sciences.
+
+- The Guardian (2022) HIV now infects more heterosexual people than gay or bisexual men – we need a new strategy, 9 Febraury.
+</p>
+
+<br>
+<br>
+<br>
+
